@@ -1,0 +1,50 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build Engine",
+      "type": "shell",
+      "command": ".\\engine\\build.bat",
+      "args": ["engine"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": ["$gcc"],
+      "group": "build"
+    },
+    {
+      "label": "Build Test Connection",
+      "type": "shell",
+      "command": ".\\engine\\build.bat",
+      "args": ["test"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": ["$gcc"]
+    },
+    {
+      "label": "Run Test Connection",
+      "type": "shell",
+      "command": ".\\engine\\bin\\test_connection.exe",
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "PATH": "D:\\ampps\\Ampps\\mysql\\lib;${env:PATH}"
+        }
+      },
+      "dependsOn": "Build Test Connection"
+    },
+    {
+      "label": "Run Engine",
+      "type": "shell",
+      "command": ".\\engine\\bin\\l_engine.exe",
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "PATH": "D:\\ampps\\Ampps\\mysql\\lib;${env:PATH}"
+        }
+      },
+      "dependsOn": "Build Engine"
+    }
+  ]
+}

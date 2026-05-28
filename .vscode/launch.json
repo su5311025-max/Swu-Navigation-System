@@ -1,0 +1,43 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug L-Engine",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/engine/bin/l_engine.exe",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [
+        {
+          "name": "PATH",
+          "value": "D:\\ampps\\Ampps\\mysql\\lib;${env:PATH}"
+        }
+      ],
+      "externalConsole": true,
+      "MIMode": "gdb",
+      "miDebuggerPath": "gdb",
+      "preLaunchTask": "Build Engine"
+    },
+    {
+      "name": "Debug Test Connection",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/engine/bin/test_connection.exe",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [
+        {
+          "name": "PATH",
+          "value": "D:\\ampps\\Ampps\\mysql\\lib;${env:PATH}"
+        }
+      ],
+      "externalConsole": true,
+      "MIMode": "gdb",
+      "miDebuggerPath": "gdb",
+      "preLaunchTask": "Build Test Connection"
+    }
+  ]
+}

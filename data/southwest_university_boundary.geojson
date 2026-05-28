@@ -1,0 +1,23 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Southwest University Campus Boundary (Approximate)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [106.4075, 29.8118],
+            [106.4315, 29.8118],
+            [106.4315, 29.8308],
+            [106.4075, 29.8308],
+            [106.4075, 29.8118]
+          ]
+        ]
+      }
+    }
+  ]
+}

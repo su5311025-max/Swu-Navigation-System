@@ -1,0 +1,8 @@
+engine/bin/*.exe
+engine/bin/*.o
+engine/bin/*.obj
+engine/bin/*.dll
+engine/bin/*.log
+web/.env
+*.user
+*.cache

@@ -1,0 +1,24 @@
+{
+  "version": 4,
+  "configurations": [
+    {
+      "name": "Win32",
+      "compilerPath": "g++",
+      "intelliSenseMode": "windows-gcc-x64",
+      "cStandard": "c17",
+      "cppStandard": "c++17",
+      "includePath": [
+        "${workspaceFolder}/engine/include",
+        "${env:MYSQL_C_API_INCLUDE}",
+        "D:/ampps/Ampps/mysql/include"
+      ],
+      "browse": {
+        "path": [
+          "${workspaceFolder}/engine/include",
+          "${env:MYSQL_C_API_INCLUDE}",
+          "D:/ampps/Ampps/mysql/include"
+        ]
+      }
+    }
+  ]
+}
