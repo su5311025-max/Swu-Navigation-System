@@ -2,13 +2,11 @@ const state = {
   graph: null,
   campus: null,
   map: null,
-  tileLayer: null,
   campusLayer: null,
   roadLayer: null,
   selectionLayer: null,
   routeLayer: null,
-  tileWarning: null,
-  tilesFailed: false,
+  mapModeControl: null,
   currentTaskId: null,
   pollingHandle: null,
   pollingAttempts: 0,
@@ -167,23 +165,18 @@ function flattenRouteSegments(routeSegments) {
   return points;
 }
 
-function showTileFallback() {
-  if (state.tilesFailed) return;
-
-  state.tilesFailed = true;
-  document.getElementById("map").classList.add("map-tiles-failed");
-
-  const TileWarning = L.Control.extend({
+function addLocalBasemapBadge() {
+  const LocalBasemapBadge = L.Control.extend({
     options: { position: "bottomleft" },
     onAdd() {
-      const container = L.DomUtil.create("div", "tile-warning");
-      container.textContent = "在线底图暂不可用，已使用本地校园底色。";
+      const container = L.DomUtil.create("div", "map-local-badge");
+      container.textContent = "本地校园底图";
       return container;
     },
   });
 
-  state.tileWarning = new TileWarning();
-  state.tileWarning.addTo(state.map);
+  state.mapModeControl = new LocalBasemapBadge();
+  state.mapModeControl.addTo(state.map);
 }
 
 function drawCampusBackdrop(campus) {
@@ -198,10 +191,10 @@ function drawCampusBackdrop(campus) {
   ];
 
   L.rectangle(bounds, {
-    color: "#7d8f68",
-    weight: 1,
+    color: "#687a5c",
+    weight: 1.4,
     fillColor: "#eef5df",
-    fillOpacity: 0.22,
+    fillOpacity: 0.5,
     interactive: false,
   }).addTo(state.campusLayer);
 
@@ -213,7 +206,7 @@ function drawCampusBackdrop(campus) {
         [lat, southWest.lon],
         [lat, northEast.lon],
       ],
-      { color: "#9caf88", weight: 0.7, opacity: 0.18, interactive: false }
+      { color: "#90a77f", weight: 0.7, opacity: 0.24, interactive: false }
     ).addTo(state.campusLayer);
   }
 
@@ -223,9 +216,20 @@ function drawCampusBackdrop(campus) {
         [southWest.lat, lon],
         [northEast.lat, lon],
       ],
-      { color: "#9caf88", weight: 0.7, opacity: 0.18, interactive: false }
+      { color: "#90a77f", weight: 0.7, opacity: 0.24, interactive: false }
     ).addTo(state.campusLayer);
   }
+}
+
+function roadStyle(wayType) {
+  const type = String(wayType || "").toLowerCase();
+  if (type === "steps") {
+    return { color: "#8f6f40", weight: 1.7, opacity: 0.64, dashArray: "3 4" };
+  }
+  if (["service", "living_street", "residential", "unclassified", "tertiary"].includes(type)) {
+    return { color: "#426f86", weight: 2.4, opacity: 0.62 };
+  }
+  return { color: "#2f6f8f", weight: 2, opacity: 0.68 };
 }
 
 function buildMap() {
@@ -233,19 +237,16 @@ function buildMap() {
     zoomControl: true,
     minZoom: 14,
     maxZoom: 19,
+    attributionControl: false,
   });
-
-  state.tileLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 19,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-  })
-    .on("tileerror", showTileFallback)
-    .addTo(state.map);
 
   state.campusLayer = L.layerGroup().addTo(state.map);
   state.roadLayer = L.layerGroup().addTo(state.map);
   state.selectionLayer = L.layerGroup().addTo(state.map);
   state.routeLayer = L.layerGroup().addTo(state.map);
+
+  L.control.scale({ imperial: false, position: "bottomright" }).addTo(state.map);
+  addLocalBasemapBadge();
 }
 
 function drawGraph(graph) {
@@ -258,11 +259,14 @@ function drawGraph(graph) {
     const latLngs = toLatLngs(edge.geometry_json);
     if (latLngs.length < 2) return;
 
-    L.polyline(latLngs, {
-      color: "#2f6f8f",
-      weight: 2.2,
-      opacity: 0.58,
-    }).addTo(state.roadLayer);
+    const line = L.polyline(latLngs, roadStyle(edge.way_type)).addTo(state.roadLayer);
+    if (edge.name) {
+      line.bindTooltip(edge.name, {
+        direction: "center",
+        sticky: true,
+        opacity: 0.86,
+      });
+    }
   });
 
   if (graph.campus?.bounds?.length === 2) {

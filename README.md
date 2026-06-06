@@ -4,8 +4,8 @@
 
 - `AMPPS` 提供 `Apache + PHP + MySQL`
 - `MinGW g++` 编译并运行 C++ 最短路引擎
-- `Leaflet` 展示在线地图与导航结果
-- `OpenStreetMap` 校园路网数据作为底层地图来源
+- 本地 `Leaflet` 展示校园矢量底图与导航结果
+- `OpenStreetMap` 校园路网数据导入数据库后作为本地底图和路径计算来源
 
 当前第一版已经实现：
 
@@ -26,6 +26,7 @@
 - [web/config.php](/D:/GitCode/Swu-Navigation-System/web/config.php)：PHP 端数据库配置
 - [web/index.php](/D:/GitCode/Swu-Navigation-System/web/index.php)：地图主页
 - [web/dashboard.php](/D:/GitCode/Swu-Navigation-System/web/dashboard.php)：任务面板
+- [web/vendor/leaflet](/D:/GitCode/Swu-Navigation-System/web/vendor/leaflet)：本地 Leaflet 前端库，避免依赖 CDN 或 VPN
 
 ## 运行环境
 

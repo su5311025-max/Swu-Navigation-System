@@ -125,19 +125,16 @@ h2 {
     background-size: 28px 28px, 28px 28px, auto;
 }
 
-#map.map-tiles-failed .leaflet-tile-pane {
-    opacity: 0;
-}
-
-.tile-warning {
+.map-local-badge {
     max-width: 280px;
     padding: 8px 10px;
-    border: 1px solid rgba(143, 61, 18, 0.18);
+    border: 1px solid rgba(77, 106, 79, 0.22);
     border-radius: 10px;
     background: rgba(255, 253, 248, 0.94);
-    color: var(--accent-dark);
+    color: var(--olive);
     box-shadow: 0 8px 18px rgba(50, 36, 18, 0.12);
     font-size: 13px;
+    font-weight: 700;
     line-height: 1.5;
 }
 
