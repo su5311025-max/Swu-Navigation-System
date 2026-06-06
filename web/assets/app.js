@@ -2,11 +2,16 @@ const state = {
   graph: null,
   campus: null,
   map: null,
+  tileLayer: null,
+  campusLayer: null,
   roadLayer: null,
   selectionLayer: null,
   routeLayer: null,
+  tileWarning: null,
+  tilesFailed: false,
   currentTaskId: null,
   pollingHandle: null,
+  pollingAttempts: 0,
   startSelection: null,
   endSelection: null,
   startMarker: null,
@@ -32,6 +37,21 @@ function setTaskMeta(html) {
 
 function setRouteText(text) {
   routeOutput.textContent = text;
+}
+
+async function readJson(response) {
+  let payload = null;
+  try {
+    payload = await response.json();
+  } catch (error) {
+    throw new Error(`服务器返回了无法解析的响应。HTTP ${response.status}`);
+  }
+
+  if (!response.ok) {
+    throw new Error(payload.data?.error || payload.message || `请求失败。HTTP ${response.status}`);
+  }
+
+  return payload;
 }
 
 function formatCoordinate(lat, lon) {
@@ -129,6 +149,8 @@ function toLatLngs(geometry) {
 
 function flattenRouteSegments(routeSegments) {
   const points = [];
+  if (!Array.isArray(routeSegments)) return points;
+
   routeSegments.forEach((segment) => {
     const segmentPoints = toLatLngs(segment.geometry);
     segmentPoints.forEach((point, index) => {
@@ -145,6 +167,67 @@ function flattenRouteSegments(routeSegments) {
   return points;
 }
 
+function showTileFallback() {
+  if (state.tilesFailed) return;
+
+  state.tilesFailed = true;
+  document.getElementById("map").classList.add("map-tiles-failed");
+
+  const TileWarning = L.Control.extend({
+    options: { position: "bottomleft" },
+    onAdd() {
+      const container = L.DomUtil.create("div", "tile-warning");
+      container.textContent = "在线底图暂不可用，已使用本地校园底色。";
+      return container;
+    },
+  });
+
+  state.tileWarning = new TileWarning();
+  state.tileWarning.addTo(state.map);
+}
+
+function drawCampusBackdrop(campus) {
+  state.campusLayer.clearLayers();
+  if (!campus?.bounds || campus.bounds.length !== 2) return;
+
+  const southWest = campus.bounds[0];
+  const northEast = campus.bounds[1];
+  const bounds = [
+    [southWest.lat, southWest.lon],
+    [northEast.lat, northEast.lon],
+  ];
+
+  L.rectangle(bounds, {
+    color: "#7d8f68",
+    weight: 1,
+    fillColor: "#eef5df",
+    fillOpacity: 0.22,
+    interactive: false,
+  }).addTo(state.campusLayer);
+
+  const latStep = 0.0025;
+  const lonStep = 0.003;
+  for (let lat = southWest.lat + latStep; lat < northEast.lat; lat += latStep) {
+    L.polyline(
+      [
+        [lat, southWest.lon],
+        [lat, northEast.lon],
+      ],
+      { color: "#9caf88", weight: 0.7, opacity: 0.18, interactive: false }
+    ).addTo(state.campusLayer);
+  }
+
+  for (let lon = southWest.lon + lonStep; lon < northEast.lon; lon += lonStep) {
+    L.polyline(
+      [
+        [southWest.lat, lon],
+        [northEast.lat, lon],
+      ],
+      { color: "#9caf88", weight: 0.7, opacity: 0.18, interactive: false }
+    ).addTo(state.campusLayer);
+  }
+}
+
 function buildMap() {
   state.map = L.map("map", {
     zoomControl: true,
@@ -152,11 +235,14 @@ function buildMap() {
     maxZoom: 19,
   });
 
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  state.tileLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-  }).addTo(state.map);
+  })
+    .on("tileerror", showTileFallback)
+    .addTo(state.map);
 
+  state.campusLayer = L.layerGroup().addTo(state.map);
   state.roadLayer = L.layerGroup().addTo(state.map);
   state.selectionLayer = L.layerGroup().addTo(state.map);
   state.routeLayer = L.layerGroup().addTo(state.map);
@@ -165,6 +251,7 @@ function buildMap() {
 function drawGraph(graph) {
   state.graph = graph;
   state.campus = graph.campus;
+  drawCampusBackdrop(graph.campus);
   state.roadLayer.clearLayers();
 
   graph.edges.forEach((edge) => {
@@ -221,7 +308,7 @@ function drawRoute(routeSegments) {
 
 async function loadGraph() {
   const response = await fetch("./get_graph.php");
-  const payload = await response.json();
+  const payload = await readJson(response);
   if (!payload.success) {
     throw new Error(payload.message || "Failed to load campus graph.");
   }
@@ -231,6 +318,7 @@ async function loadGraph() {
 function updateSelection(mode, latlng) {
   stopPolling();
   state.currentTaskId = null;
+  state.pollingAttempts = 0;
   clearRoute();
 
   const selection = {
@@ -278,7 +366,7 @@ async function submitTask() {
     }),
   });
 
-  const payload = await response.json();
+  const payload = await readJson(response);
   if (!payload.success) {
     setTaskMeta(`<p>${payload.message}</p>`);
     setRouteText(payload.data?.error || "任务创建失败。");
@@ -316,11 +404,17 @@ function stopPolling() {
   }
 }
 
+function handlePollingError(error) {
+  setRouteText(error.message || "状态查询失败。");
+  stopPolling();
+}
+
 async function pollTask() {
   if (!state.currentTaskId) return;
+  state.pollingAttempts += 1;
 
   const response = await fetch(`./check_status.php?task_id=${state.currentTaskId}`);
-  const payload = await response.json();
+  const payload = await readJson(response);
   if (!payload.success) {
     setRouteText(payload.data?.error || payload.message || "状态查询失败。");
     stopPolling();
@@ -344,14 +438,19 @@ async function pollTask() {
     setRouteText(`任务失败: ${task.error_message || "未知错误"}`);
     stopPolling();
   } else {
-    setRouteText("任务正在处理中，请稍候...");
+    const engineHint =
+      state.pollingAttempts > 25 ? "\n如果长时间没有完成，请确认 engine\\bin\\l_engine.exe 正在运行。" : "";
+    setRouteText(`任务正在处理中，请稍候...${engineHint}`);
   }
 }
 
 function startPolling() {
   stopPolling();
-  pollTask();
-  state.pollingHandle = window.setInterval(pollTask, 1200);
+  state.pollingAttempts = 0;
+  pollTask().catch(handlePollingError);
+  state.pollingHandle = window.setInterval(() => {
+    pollTask().catch(handlePollingError);
+  }, 1200);
 }
 
 function bindEvents() {

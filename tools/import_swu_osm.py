@@ -61,7 +61,11 @@ class EdgeRow:
 def parse_args() -> argparse.Namespace:
     root = Path(__file__).resolve().parents[1]
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--input", required=True, help="Path to an .osm XML export for the campus area.")
+    parser.add_argument(
+        "--input",
+        default=str(root / "data" / "swu.osm"),
+        help="Path to an .osm XML export for the campus area. Defaults to data/swu.osm.",
+    )
     parser.add_argument("--schema", default=str(root / "sql" / "schema.sql"))
     parser.add_argument("--boundary", default=str(root / "data" / "southwest_university_boundary.geojson"))
     parser.add_argument("--mysql-bin", default=os.getenv("L_ENGINE_MYSQL_BIN", ""))
@@ -313,7 +317,6 @@ def run_mysql(mysql_bin: str, args: argparse.Namespace, sql_text: str) -> None:
 
 def main() -> int:
     args = parse_args()
-    root = Path(__file__).resolve().parents[1]
     osm_path = Path(args.input)
     schema_path = Path(args.schema)
     boundary_path = Path(args.boundary)
@@ -332,6 +335,8 @@ def main() -> int:
 
     mysql_bin = find_mysql_binary(args.mysql_bin)
     schema_sql = schema_path.read_text(encoding="utf-8")
+    schema_sql = "SET FOREIGN_KEY_CHECKS=0;\n" + schema_sql
+    schema_sql += "\nSET FOREIGN_KEY_CHECKS=1;"
     import_sql = build_import_sql(used_osm_nodes, edges, args.db_name)
 
     run_mysql(mysql_bin, args, schema_sql)

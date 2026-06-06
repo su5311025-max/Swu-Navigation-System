@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug L-Engine",
+      "name": "Debug Swu Navigation",
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/engine/bin/l_engine.exe",

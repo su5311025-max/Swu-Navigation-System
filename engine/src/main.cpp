@@ -1,3 +1,4 @@
+#include "AppPaths.h"
 #include "ConfigLoader.h"
 #include "MySQLManager.h"
 #include "PathFinder.h"
@@ -7,12 +8,14 @@
 #include <iostream>
 #include <thread>
 
-int main() {
+int main(int argc, char* argv[]) {
     try {
-        const DBConfig config = ConfigLoader::load("engine/config.ini");
+        const std::string configPath = resolveConfigPath(argc, argv);
+        const DBConfig config = ConfigLoader::load(configPath);
         MySQLManager manager(config);
         manager.connect();
 
+        std::cout << "Loaded config: " << configPath << std::endl;
         std::cout << "Connected to MySQL. Loading graph..." << std::endl;
         const Graph graph = manager.loadGraph();
         const PathFinder pathFinder(graph);

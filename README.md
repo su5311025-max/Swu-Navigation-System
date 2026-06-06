@@ -1,6 +1,6 @@
-# L-Engine
+# Swu-Navigation-System
 
-`L-Engine` 是一个面向西南大学校内步行导航的课程项目，采用：
+`Swu-Navigation-System` 是一个面向西南大学校内步行导航的课程项目，采用：
 
 - `AMPPS` 提供 `Apache + PHP + MySQL`
 - `MinGW g++` 编译并运行 C++ 最短路引擎
@@ -17,15 +17,15 @@
 
 ## 项目结构
 
-- [sql/schema.sql](/D:/GitCode/year-2/sql/schema.sql)：数据库结构
-- [tools/import_swu_osm.py](/D:/GitCode/year-2/tools/import_swu_osm.py)：OSM 导入脚本
-- [data/swu.osm](/D:/GitCode/year-2/data/swu.osm)：当前使用的西南大学地图数据
-- [data/southwest_university_boundary.geojson](/D:/GitCode/year-2/data/southwest_university_boundary.geojson)：校园边界裁剪文件
-- [engine/build.bat](/D:/GitCode/year-2/engine/build.bat)：C++ 构建脚本
-- [engine/config.ini](/D:/GitCode/year-2/engine/config.ini)：C++ 引擎数据库配置
-- [web/config.php](/D:/GitCode/year-2/web/config.php)：PHP 端数据库配置
-- [web/index.php](/D:/GitCode/year-2/web/index.php)：地图主页
-- [web/dashboard.php](/D:/GitCode/year-2/web/dashboard.php)：任务面板
+- [sql/schema.sql](/D:/GitCode/Swu-Navigation-System/sql/schema.sql)：数据库结构
+- [tools/import_swu_osm.py](/D:/GitCode/Swu-Navigation-System/tools/import_swu_osm.py)：OSM 导入脚本
+- [data/swu.osm](/D:/GitCode/Swu-Navigation-System/data/swu.osm)：当前使用的西南大学地图数据
+- [data/southwest_university_boundary.geojson](/D:/GitCode/Swu-Navigation-System/data/southwest_university_boundary.geojson)：校园边界裁剪文件
+- [engine/build.bat](/D:/GitCode/Swu-Navigation-System/engine/build.bat)：C++ 构建脚本
+- [engine/config.ini](/D:/GitCode/Swu-Navigation-System/engine/config.ini)：C++ 引擎数据库配置
+- [web/config.php](/D:/GitCode/Swu-Navigation-System/web/config.php)：PHP 端数据库配置
+- [web/index.php](/D:/GitCode/Swu-Navigation-System/web/index.php)：地图主页
+- [web/dashboard.php](/D:/GitCode/Swu-Navigation-System/web/dashboard.php)：任务面板
 
 ## 运行环境
 
@@ -42,14 +42,14 @@ AMPPS 默认用到的 MySQL 相关目录：
 
 ## 部署步骤
 
-下面步骤按当前项目实际目录编写，适用于本机路径 `D:\GitCode\year-2`。
+下面步骤按当前项目实际目录编写，适用于本机路径 `D:\GitCode\Swu-Navigation-System`。
 
 ### 1. 配置数据库
 
 确认以下两个文件中的数据库连接信息一致：
 
-- [web/config.php](/D:/GitCode/year-2/web/config.php)
-- [engine/config.ini](/D:/GitCode/year-2/engine/config.ini)
+- [web/config.php](/D:/GitCode/Swu-Navigation-System/web/config.php)
+- [engine/config.ini](/D:/GitCode/Swu-Navigation-System/engine/config.ini)
 
 当前默认配置为：
 
@@ -65,12 +65,13 @@ AMPPS 默认用到的 MySQL 相关目录：
 
 当前项目已经使用本地地图文件：
 
-- [data/swu.osm](/D:/GitCode/year-2/data/swu.osm)
+- [data/swu.osm](/D:/GitCode/Swu-Navigation-System/data/swu.osm)
 
-在项目根目录 `D:\GitCode\year-2` 打开 PowerShell，执行：
+在项目根目录 `D:\GitCode\Swu-Navigation-System` 打开 PowerShell，执行：
 
 ```powershell
-python .\tools\import_swu_osm.py --input D:\GitCode\year-2\data\swu.osm
+cd D:\GitCode\Swu-Navigation-System
+python .\tools\import_swu_osm.py
 ```
 
 这一步会自动完成以下工作：
@@ -81,7 +82,7 @@ python .\tools\import_swu_osm.py --input D:\GitCode\year-2\data\swu.osm
 - 导入可步行道路
 - 计算每条边的真实距离和预计步行时间
 
-如果你后续修改了校园边界文件 [data/southwest_university_boundary.geojson](/D:/GitCode/year-2/data/southwest_university_boundary.geojson)，重新执行这条命令即可重新导入。
+如果你后续修改了校园边界文件 [data/southwest_university_boundary.geojson](/D:/GitCode/Swu-Navigation-System/data/southwest_university_boundary.geojson)，重新执行这条命令即可重新导入。
 
 ### 3. 编译 C++ 路由引擎
 
@@ -92,10 +93,10 @@ python .\tools\import_swu_osm.py --input D:\GitCode\year-2\data\swu.osm
 .\engine\build.bat test
 ```
 
-成功后会在 [engine/bin](/D:/GitCode/year-2/engine/bin) 下生成：
+成功后会在 [engine/bin](/D:/GitCode/Swu-Navigation-System/engine/bin) 下生成：
 
-- [engine/bin/l_engine.exe](/D:/GitCode/year-2/engine/bin/l_engine.exe)
-- [engine/bin/test_connection.exe](/D:/GitCode/year-2/engine/bin/test_connection.exe)
+- [engine/bin/l_engine.exe](/D:/GitCode/Swu-Navigation-System/engine/bin/l_engine.exe)
+- [engine/bin/test_connection.exe](/D:/GitCode/Swu-Navigation-System/engine/bin/test_connection.exe)
 
 ### 4. 测试数据库连接
 
@@ -132,7 +133,7 @@ Graph ready. Node count: 1751
 
 ### 6. 部署 PHP 页面
 
-将 [web](/D:/GitCode/year-2/web) 目录复制到 AMPPS 的网站根目录，或者建立映射，使浏览器能够访问该目录中的 PHP 文件。
+将 [web](/D:/GitCode/Swu-Navigation-System/web) 目录复制到 AMPPS 的网站根目录，或者建立映射，使浏览器能够访问该目录中的 PHP 文件。
 
 例如部署后可以通过下面地址访问：
 
@@ -158,7 +159,7 @@ Graph ready. Node count: 1751
 
 ### 8. 查看任务状态
 
-可以打开 [web/dashboard.php](/D:/GitCode/year-2/web/dashboard.php) 查看：
+可以打开 [web/dashboard.php](/D:/GitCode/Swu-Navigation-System/web/dashboard.php) 查看：
 
 - 当前节点数
 - 当前边数
@@ -202,7 +203,7 @@ Graph ready. Node count: 1751
 
 解决方法：
 
-- 修改 [data/southwest_university_boundary.geojson](/D:/GitCode/year-2/data/southwest_university_boundary.geojson)
+- 修改 [data/southwest_university_boundary.geojson](/D:/GitCode/Swu-Navigation-System/data/southwest_university_boundary.geojson)
 - 重新执行导入命令
 
 ## 路径计算说明

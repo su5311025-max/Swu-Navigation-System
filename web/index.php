@@ -20,7 +20,7 @@ declare(strict_types=1);
         <section class="panel panel-map">
             <div class="panel-head">
                 <div>
-                    <p class="eyebrow">L-Engine Campus</p>
+                    <p class="eyebrow">Swu Navigation</p>
                     <h1>西南大学校内步行导航</h1>
                     <p class="panel-copy">点击地图设置起点和终点，系统会自动吸附到最近的校园步行路网节点，并按预计步行时间规划路线。</p>
                 </div>
